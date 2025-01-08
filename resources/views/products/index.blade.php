@@ -89,7 +89,7 @@
                                     <textarea class="form-control" name="shipping_address" placeholder="Adresse de livraison" required></textarea>
                                 </div>
                                 <button type="submit" class="btn btn-primary w-100" id="checkout-button" disabled>
-                                    Passer la commande
+                                    Envoyer
                                 </button>
                             </form>
                             
