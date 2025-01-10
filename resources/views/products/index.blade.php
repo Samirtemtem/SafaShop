@@ -88,8 +88,11 @@
                                 <div class="mb-3">
                                     <textarea class="form-control" name="shipping_address" placeholder="Adresse de livraison" required></textarea>
                                 </div>
-                                <button type="submit" class="btn btn-primary w-100" id="checkout-button" disabled>
+                                <button type="submit" class="btn btn-primary w-100 mb-2" id="checkout-button" disabled>
                                     Envoyer
+                                </button>
+                                <button type="button" class="btn btn-secondary w-100" id="view-products-btn" data-bs-toggle="modal" data-bs-target="#productsModal">
+                                    Voir les produits sélectionnés
                                 </button>
                             </form>
                             
@@ -99,6 +102,38 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Products Modal -->
+<div class="modal fade" id="productsModal" tabindex="-1" aria-labelledby="productsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productsModalLabel">Produits Sélectionnés</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Produit</th>
+                                <th>Prix unitaire</th>
+                                <th>Quantité</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="selected-products-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
             </div>
         </div>
     </div>
@@ -206,27 +241,47 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         
         updateCart() {
-            const cartItems = document.getElementById('cart-items');
+            const cartItemsContainer = document.getElementById('cart-items');
+            const selectedProductsTable = document.getElementById('selected-products-table');
             const subtotalAmount = document.getElementById('subtotal-amount');
             const discountAmount = document.getElementById('discount-amount');
             const totalAmount = document.getElementById('total-amount');
             const checkoutButton = document.getElementById('checkout-button');
             
-            cartItems.innerHTML = this.items.map(item => `
-                <div class="cart-item">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-0">${item.name}</h6>
-                            <small class="text-muted">${item.quantity} x €${item.price.toFixed(2)}</small>
-                        </div>
-                        <button class="btn btn-sm btn-link text-danger remove-item" data-id="${item.id}">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+            cartItemsContainer.innerHTML = '';
+            selectedProductsTable.innerHTML = '';
             
-            const subtotal = this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            let subtotal = 0;
+            
+            this.items.forEach(item => {
+                // Update cart items
+                const itemTotal = item.price * item.quantity;
+                subtotal += itemTotal;
+                
+                cartItemsContainer.innerHTML += `
+                    <div class="cart-item">
+                        <div class="d-flex justify-content-between">
+                            <span>${item.name}</span>
+                            <span>€${itemTotal.toFixed(2)}</span>
+                        </div>
+                        <div class="small text-muted">
+                            ${item.quantity} x €${item.price.toFixed(2)}
+                        </div>
+                    </div>
+                `;
+                
+                // Update modal table
+                selectedProductsTable.innerHTML += `
+                    <tr>
+                        <td>${item.id}</td>
+                        <td>${item.name}</td>
+                        <td>€${item.price.toFixed(2)}</td>
+                        <td>${item.quantity}</td>
+                        <td>€${itemTotal.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+            
             const discount = subtotal * 0.1; // 10% discount
             const total = subtotal - discount;
             
